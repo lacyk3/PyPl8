@@ -31,7 +31,7 @@ from skimage.color import label2rgb
 from shutil import copy2
 import cv2
 
-from pyplate.Preprocessing import preprocessing_methods as PP
+from .Preprocessing import preprocessing_methods as PP
 #from pyplate.Barcodes import barcode_methods as BM
 
 # -- Functions for Segmentation
