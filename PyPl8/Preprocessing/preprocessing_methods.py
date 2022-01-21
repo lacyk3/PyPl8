@@ -274,7 +274,7 @@ def AutoCrop(file, sourcefolderpath, rotate = False,
     bufferr = 250 # buffer away from plate edges
     bufferc = 175
     rps = np.linspace(r1+bufferr, r2-bufferr, array_dimensions[0])
-    cps = np.linspace(c1+bufferr, c2-bufferr, array_dimensions[1])
+    cps = np.linspace(c1+bufferc, c2-bufferr, array_dimensions[1])
     corners = []
     for r in rps:
         for c in cps:
