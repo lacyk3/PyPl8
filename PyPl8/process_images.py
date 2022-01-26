@@ -83,7 +83,7 @@ def SegmentTile(tile, background, pin_size=25, threshold_method='otsu'):
         radii = []
         for radius, h in zip(hough_radii, hough_res):
             # For each radius, extract one circle
-            peaks = peak_local_max(h, num_peaks=1)
+            peaks = peak_local_max(h, num_peaks=1, min_distance=25)
             centers.extend(peaks)
             accums.extend(h[peaks[:, 0],peaks[:,1]])
             radii.extend([radius])
