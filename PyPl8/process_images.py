@@ -182,7 +182,7 @@ def BuildDF(tiles,masks,features ='all',save=True):
     return df
 
 def ProcessImage(file, sourcefolder, outputfolder,
-                 crop_method = 'Auto', crop_param = None, s = 200, array_dimensions = (8,12),
+                 crop_method = 'Auto', pin_size = 25, crop_param = None, s = 200, array_dimensions = (8,12),
                  adjust = True, rotate = False, save = True, display = False, calibrate = False):
     
     image = PP.LoadImage(file, sourcefolder, rotate = rotate)
@@ -224,7 +224,7 @@ def ProcessImage(file, sourcefolder, outputfolder,
     background = CalculateBackground(tiles)
     masks = []
     for tile in tiles:
-        masks.append(SegmentTile(tile, background, pin_size=25, threshold_method='otsu'))
+        masks.append(SegmentTile(tile, background, pin_size=pin_size, threshold_method='otsu'))
     
     image_label_overlay = BuildSegmentedImage(image,masks,corners)
     df = BuildDF(tiles, masks, features ='all',save=True)
@@ -244,7 +244,7 @@ def ProcessImage(file, sourcefolder, outputfolder,
     return df, tiles, masks, corners
     
 def Process1Image(file, sourcefolder, outputfolder,
-                 corners, s = 200, array_dimensions = (8,12),
+                 corners, pin_size = 25, s = 200, array_dimensions = (8,12),
                  adjust = True, rotate = False, save = True, display = False):
     # -- Load Image
     image = PP.LoadImage(file, sourcefolder, rotate = rotate)
@@ -261,7 +261,7 @@ def Process1Image(file, sourcefolder, outputfolder,
     # -- Segment tiles
     masks = []
     for tile in tiles:
-        masks.append(SegmentTile(tile, background, pin_size=25, threshold_method='otsu'))
+        masks.append(SegmentTile(tile, background, pin_size=pin_size, threshold_method='otsu'))
     # -- Merge Segmented Plate image
     image_label_overlay = BuildSegmentedImage(image,masks,corners)
     # -- Extract Features
@@ -282,7 +282,7 @@ def Process1Image(file, sourcefolder, outputfolder,
     return None    
         
 def ProcessBatch(sourcefolder, outputfolder,   
-                crop_method = 'Auto', s = 200, array_dimensions = (8,12),
+                crop_method = 'Auto', s = 200, pin_size = 25, array_dimensions = (8,12),
                 adjust = True, rotate = False, save = True, display = False):
     # -- Set Up Folders
     wd = os.getcwd()
@@ -297,7 +297,7 @@ def ProcessBatch(sourcefolder, outputfolder,
     file = image_list[0]
     df, tiles, masks, corners = ProcessImage(file, sourcefolder, outputfolder,
                                      crop_method = crop_method, crop_param = None, s = s, 
-                                     array_dimensions = array_dimensions,
+                                     array_dimensions = array_dimensions, pin_size = pin_size,
                                      adjust = adjust, rotate = rotate, 
                                      save = False, display = True, calibrate = True)
     PP.DisplayTiles(tiles)
@@ -307,7 +307,7 @@ def ProcessBatch(sourcefolder, outputfolder,
     if user_input == 'y':
         for file in file_list:
             Process1Image(file, sourcefolder, outputfolder,
-                 corners, s = s, array_dimensions = array_dimensions,
+                 corners, s = s, array_dimensions = array_dimensions, pin_size = pin_size,
                  adjust = adjust, rotate = rotate, save = True, display = False)
     return None
     
