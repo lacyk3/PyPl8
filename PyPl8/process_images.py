@@ -7,7 +7,7 @@ from skimage import feature, filters, data, color, io
 import skimage
 from skimage.transform import hough_circle
 from skimage.feature import peak_local_max
-from skimage.draw import circle
+from skimage.draw import disk
 from scipy.signal import find_peaks
 from IPython.display import clear_output
 #import collections
@@ -98,7 +98,7 @@ def SegmentTile(tile, background, pin_size=25, threshold_method='otsu'):
             center_x, center_y = centers[idx]
             radius = radii[idx]
             # Build mask
-            cx, cy = circle(center_x, center_y, radius)
+            cx, cy = disk((center_x, center_y), radius)
             colony_mask_center = np.zeros_like(edges_center)
             colony_mask = np.zeros_like(edges)
             try:
