@@ -195,7 +195,8 @@ def BuildDF(tiles,masks,features ='all',save=True):
             for y in ['1','2','3','4','5','6','7','8','9','10','11','12']])    
     data = []
     if features == 'all':
-        features = ['Position','Area','AvgInt','PixelSum', 'Background', 'Perimeter','Variance']
+        features = (['Position','Area','AvgInt','PixelSum', 'Background', 'Perimeter','Variance', 'Complexity',
+                    'LBP1', 'LBP2','LBP3','LBP4','LBP5','LBP6','LBP7','LBP8','LBP9','LBP10'])
         j = 0
         for (tile,mask,position) in zip(tiles,masks,positions):
             size_features = SizeFeatures(tile,mask)
@@ -204,8 +205,16 @@ def BuildDF(tiles,masks,features ='all',save=True):
                 size_features.append(t)
             size_features.insert(0,position)    
             data.append(size_features.copy())
-            
-        
+    elif features == 'size':
+        features = ['Position','Area','AvgInt','PixelSum', 'Background', 'Perimeter']
+        j = 0
+        for (tile,mask,position) in zip(tiles,masks,positions):
+            size_features = SizeFeatures(tile,mask)
+            size_features.insert(0,position)    
+            data.append(size_features.copy())
+    else:
+        print('Feature options are \"size\" or \"all\"')
+                  
     df = pd.DataFrame(data, columns = features)
     return df
 
