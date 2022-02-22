@@ -154,12 +154,40 @@ def TextureFeatures(tile,mask):
         gray_tile = skimage.color.rgb2gray(tile)
     else:
         gray_tile = tile.copy()
-    clean_tile = tile*mask
-    if np.sum(1*mask) > 0:
+    area = np.sum(1*mask)                 
+    selem = np.array([[0, 0, 0, 1, 0, 0, 0],
+                      [0, 0, 1, 1, 1, 0, 0],
+                      [0, 1, 1, 1, 1, 1, 0],
+                      [1, 1, 1, 1, 1, 1, 1],
+                      [0, 1, 1, 1, 1, 1, 0],
+                      [0, 0, 1, 1, 1, 0, 0],
+                      [0, 0, 0, 1, 0, 0, 0]])
+       
+    if area > 0:
+        # -- variance
         variance = np.var(tile[mask])
+        # -- local binary patterns
+        LBP = mask*skimage.feature.local_binary_pattern(tile, 8, 10, method='uniform') 
+        hist, hist_centers = histogram(LBP[mask])
+        temp = hist[hist>0]/area
+        if len(temp) == 10:
+                LBP_score = temp
+        else:
+            LBP_score = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
+        # sobel filter
+        clean_tile = tile*mask
+        mask_temp = clean_tile>0.2
+        im = 255*clean_tile*mask_temp
+        M = skimage.morphology.binary_erosion(clean_tile*mask_temp,selem=selem )
+        im_contrast = skimage.exposure.adjust_gamma(im)
+        filt1 = skimage.filters.sobel(im, mask=M)
+        filt2 = skimage.filters.sobel(filt1, mask=M)
+        C_score = np.sum(filt2[mask])/area
     else:
-        variance = 'NaN'
-    return [variance]
+        variance = np.nan
+        LBP_score = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
+        C_score = np.nan
+    return [variance, C_score]+LBP_score.tolist()
 
 def BuildDF(tiles,masks,features ='all',save=True):
     
