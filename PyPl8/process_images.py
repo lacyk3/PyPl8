@@ -342,10 +342,44 @@ def ProcessBatch(sourcefolder, outputfolder,
         
     # -- Process all images
     if user_input == 'y':
+        lines = (['BATCH PROCESS PARAMETERS',
+                'Crop method: '+crop_method, 
+                'Tile side length: ' +str(s)+ ' pixels', 
+                'Pin radius: '+str(pin_size)+ ' pixels', 
+                'Array dimensions: '+str(array_dimensions),
+                'Autoadjust: '+str(adjust), 
+                'Rotate images: '+str(adjust),
+                'SEGMENTATION PARAMETERS',
+                'Minimum intensity: 0.035 + background',
+                'Minimum area: np.pi*(pin_size+10)**2',
+                'Minimum circle certainty: 0.42',
+                'Maximum circle certainty: 0.92', 
+                'CROPPING PARAMETERS',
+                'Min object size in auto adjust: 2000 pixels',
+                'Plate Height in auto crop: ~1700 pixels',
+                'Plate intensity in auto crop: 0.5',
+                'Row buffer in auto crop: 250',
+                'Column buffer in auto crop: 175',
+                'COMPLETION'])
+        
+        with open(os.path.join(outputfolder,'BatchParameters.txt'), 'w') as f:
+            for line in lines:
+                f.write(line)
+                f.write('\n')
+                
+        count = 0
         for file in file_list:
-            Process1Image(file, sourcefolder, outputfolder,
-                 corners, s = s, array_dimensions = array_dimensions, pin_size = pin_size,
-                 adjust = adjust, rotate = rotate, save = True, display = False)
+            try:
+                Process1Image(file, sourcefolder, outputfolder,
+                     corners, s = s, array_dimensions = array_dimensions, pin_size = pin_size,
+                     adjust = adjust, rotate = rotate, save = True, display = False)
+                count = count+1
+            except:
+                continue
+                
+        file_object = open(os.path.join(outputfolder,'BatchParameters.txt'), 'a')
+        file_object.write(str(count)+' out of '+ str(len(file_list))+ ' images processed.')
+        file_object.close()
     return None
     
     
