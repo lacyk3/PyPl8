@@ -31,8 +31,8 @@ from skimage.color import label2rgb
 from shutil import copy2
 import cv2
 
-from .Preprocessing import preprocessing_methods as PP
-#from pyplate.Barcodes import barcode_methods as BM
+from .Preprocessing import PreprocessingMethods as PP
+#from .Barcodes import BarcodeMethods as BM
 
 # -- Functions for Segmentation
 def CalculateBackground(tiles):
