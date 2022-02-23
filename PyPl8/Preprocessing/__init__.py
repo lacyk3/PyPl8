@@ -1,1 +1,1 @@
-from .preprocessing_methods import *
+from .PreprocessingMethods import *
