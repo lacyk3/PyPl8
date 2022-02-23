@@ -1,1 +1,1 @@
-from .barcode_methods import *
+from .BarcodeMethods import *
