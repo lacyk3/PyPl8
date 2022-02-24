@@ -12,6 +12,7 @@ from scipy.signal import find_peaks
 from IPython.display import clear_output
 #import collections
 
+import pkg_resources
 import sys
 sys.path.append('./')
 from skimage.filters import sobel
@@ -178,7 +179,7 @@ def TextureFeatures(tile,mask):
         clean_tile = tile*mask
         mask_temp = clean_tile>0.2
         im = 255*clean_tile*mask_temp
-        M = skimage.morphology.binary_erosion(clean_tile*mask_temp,selem=selem )
+        M = skimage.morphology.binary_erosion(clean_tile*mask_temp,footprint=selem )
         im_contrast = skimage.exposure.adjust_gamma(im)
         filt1 = skimage.filters.sobel(im, mask=M)
         filt2 = skimage.filters.sobel(filt1, mask=M)
@@ -382,8 +383,85 @@ def ProcessBatch(sourcefolder, outputfolder,
         file_object.close()
     return None
     
+ 
     
     
+## -- Functions for loading example images
+def Funnel1():
+    stream = pkg_resources.resource_stream(__name__, 'Data/Funnel-1.jpg')
+    return skimage.io.imread(stream)
+def Funnel2():
+    stream = pkg_resources.resource_stream(__name__, 'Data/Funnel-2.jpg')
+    return skimage.io.imread(stream)
+def Funnel3():
+    stream = pkg_resources.resource_stream(__name__, 'Data/Funnel-3.jpg')
+    return skimage.io.imread(stream)
+def PSAT11():
+    stream = pkg_resources.resource_stream(__name__, 'Data/PSAT1-1.jpg')
+    return skimage.io.imread(stream)
+def PSAT12():
+    stream = pkg_resources.resource_stream(__name__, 'Data/PSAT1-2.jpg')
+    return skimage.io.imread(stream)
+def OTC1():
+    stream = pkg_resources.resource_stream(__name__, 'Data/OTC-1.jpg')
+    return skimage.io.imread(stream)
+def OTC2():
+    stream = pkg_resources.resource_stream(__name__, 'Data/OTC-2.jpg')
+    return skimage.io.imread(stream)
+
+## -- Function for processing example images
+
+def ProcessImageTest(image, outputfolder,crop_method = 'Auto', crop_param = None, s = 200, pin_size = 25, array_dimensions = (8,12),
+                 adjust = True, rotate = False, save = True, display = False, calibrate = False):
     
+    if crop_method == 'Auto':
+        tiles, corners = PP.AutoCropTest(image, s = s, array_dimensions = array_dimensions, 
+                                  adjust=adjust, display = display)    
+    elif crop_method == 'Grid':
+        if calibrate:
+            not_accept = True
+            while not_accept:
+                PP.GridDisplay(image)
+                c1 = int(input("Input the x position of the center of patch A1 in pixels and press enter."))
+                r1 = int(input("Input the y position of the center of patch A1 in pixels and press enter."))
+                clear_output()
+                PP.EnhancedGridDisplay(image, (r1,c1),s,array_dimensions)
+                user_input = input("Would you like to proceed? y/n")
+                if user_input == 'y':
+                    not_accept = False
+                if user_input == 'n':
+                    continue                 
+            clear_output()
+            crop_param = (r1,c1)            
+        if crop_param:
+            A1_location = crop_param
+        else:
+            A1_location = (650,600)
+        tiles, corners = PP.GridCropTest(image,
+                                  A1_location = A1_location, s = s, array_dimensions = array_dimensions, 
+                                  adjust=adjust, display = display)
+    else:
+        print('crop_method options are Auto or Grid')
+        
+    background = CalculateBackground(tiles)
+    masks = []
+    for tile in tiles:
+        masks.append(SegmentTile(tile, background, pin_size=pin_size, threshold_method='otsu'))
     
+    image_label_overlay = BuildSegmentedImage(image,masks,corners)
+    df = BuildDF(tiles, masks, features ='all',save=True)
+    
+    if save:
+        filename = 'TestImage.csv'
+        (df.to_csv(os.path.join(outputfolder, filename), index=False))
+        img_seg = 255*(image_label_overlay[200:-200,200:-200,:]) 
+        A = Image.fromarray(img_seg.astype('uint8'), 'RGB')
+        A.save(os.path.join(outputfolder,'TestImage_seg.jpg'))
+    
+    if display:
+        fig, axs = plt.subplots(1,1,figsize=(12,16))
+        axs.imshow(image_label_overlay[200:-200,200:-200,:]);
+        axs.axis('off')
+        plt.show();
+    return df, tiles, masks, corners
     
