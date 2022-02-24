@@ -449,3 +449,105 @@ def EnhancedGridDisplay(image, corner, s, array_dimensions):
             axs.add_patch(rect)
     plt.show();
     return None
+
+def AutoCropTest(image, s = 200, array_dimensions = (8,12),adjust=True, display = False):
+    '''
+    Input: RGB or grayscale image of rectangular arrayed plate.
+           parameter: plate height in pixels
+           s side length of desired tiles in pixels
+           array_dimensions number of rows and columns in pin arrangement
+           Display True or False indicating whether to show resulting tiles on screen
+           Adjust True or False indicating whether to adjust tile location with 
+                       the AutoAjust function defined above or just use the initial guess grid
+    Returns: 
+            tiles --Ordered list of subsections of the image containing a single colony, 
+                or blanks if there are empty spots in the array 
+            corners -- list of top left corners corresponding to location of these tiles
+    '''
+    
+    # Convert to gray_scale if necessary. Return a message if image is in unexpected format.
+    if len(np.shape(image))==3:
+        img = skimage.color.rgb2gray(image)
+    elif len(np.shape(image))==2:
+        img = image
+    else:
+        print("Input image must be grayscale or RGB.")
+        
+    # Crop to plate by identifying abrupt change from black background to plate edge.    
+    x = np.sum(img > 0.5, axis = 0)
+    thresholdedx = [c[0] for c in np.argwhere(x >1700)] #rough estimate of agar height
+    ddx = np.diff(thresholdedx)
+    idx = np.argmax(ddx)
+    c1 = thresholdedx[idx]; c2 = thresholdedx[idx+1]
+
+    # -- Identify top and bottom
+    bw = img>.5
+    bw = remove_small_objects(bw, min_size =1000)
+    mask = convex_hull_image(bw)
+
+    y = np.sum(mask, axis = 1)
+    dd = np.diff(y>0)
+    r1 = np.argwhere(dd>0)[0][0]
+    r2 = np.argwhere(dd>0)[1][0]
+    
+    # -- Set initial guess for grid estimating where pin points were
+    bufferr = 250 # buffer away from plate edges
+    bufferc = 175
+    rps = np.linspace(r1+bufferr, r2-bufferr, array_dimensions[0])
+    cps = np.linspace(c1+bufferc, c2-bufferc, array_dimensions[1])
+    corners = []
+    for r in rps:
+        for c in cps:
+            corners.append((int(r-s/2),int(c-s/2))) 
+    # -- Adjust to center each patch on a tile
+    if adjust:
+        new_corners = AutoAdjust(img, corners, s = s, array_dimensions = array_dimensions)
+        corners = AutoAdjust(img, new_corners, s = s, array_dimensions = array_dimensions)
+    # -- Crop tiles    
+    tiles = MakeTiles(img, corners, s = s)        
+    return tiles, corners
+             
+    
+def GridCropTest(image, A1_location = (500,500), s = 200, array_dimensions = (8,12), 
+              adjust=True, display = False):
+    '''
+    input: image array
+           expected dimensions of array of colonies on plate
+           A1_location: estimate of center of pin location A1
+           expected tile size in pixels           
+           Adjust -- True or False indicating whether to automatically adjust 
+           tile locations to be centered on bright patches
+    returns: tiles-- list of square regions of interest defined 
+            corners -- list of top left corners of tiles
+    
+    '''
+   
+    # Convert to gray_scale if necessary. Return a message if image is in unexpected format.
+    if len(np.shape(image))==3:
+        img = skimage.color.rgb2gray(image)
+    elif len(np.shape(image))==2:
+        img = image
+    else:
+        print("Input image must be grayscale or RGB.")
+        
+    # -- Initiate grid locations based on A1    
+    r1 = A1_location[0]
+    r2 = r1 + (array_dimensions[0]-1/2)*s
+    c1 = A1_location[1]
+    c2 = c1 + (array_dimensions[1]- 1/2)*s*1.02
+
+    rps = np.linspace(r1,r2,8)
+    cps = np.linspace(c1,c2,12)
+    
+    corners = []
+    for r in rps:
+        for c in cps:
+            corners.append((int(r-s/2),int(c-s/2))) 
+    
+    # -- Adjust to center each patch on a tile
+    if adjust:
+        new_corners = AutoAdjust(img, corners, s = s, array_dimensions = array_dimensions)
+        corners = AutoAdjust(img, new_corners, s = s, array_dimensions = array_dimensions)
+    # -- Crop tiles    
+    tiles = MakeTiles(img, corners, s = s)        
+    return tiles, corners   
