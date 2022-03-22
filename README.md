@@ -17,5 +17,16 @@ relating barcode numbers to relevant plate information is provided.
 
 * The file process_images.py contains the main functions for processing a single image or a batch of images
 
-* Coming soon: paralellizing batch processing
+## Dependencies
+
+This package was developed with the following versions of dependencies:
+* python 3.10.1
+* Ipython 7.29.0
+* matplotlib 3.5.0
+* numpy 1.19.2
+* opencv-python 4.2.0.32
+* pandas 1.3.4
+* pyzbar 0.1.8
+* scikit-image 0.18.3
+* scipy 1.6.2
 
