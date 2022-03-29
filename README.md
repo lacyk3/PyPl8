@@ -2,11 +2,12 @@
 
 Image analysis package for segmenting images of microbial communities and extracting quantitative features automatically. 
 
+![Patches of yeast cells display diverse phenotypes.](yeastpic.png)
+
 ## Background
 This package makes use of the cv2 and sci-kit image libraries for image processing. 
 
-It was developed in the Dudley lab at Pacific Northwest Research Institute and is currently most useful for analyzing images of rectangularly arrayed
-patches/colonies on agar plates photographed against a dark background.
+It was developed in the [Dudley lab](https://www.pnri.org/research/labs/dudley-lab/) at Pacific Northwest Research Institute and is currently most useful for analyzing images of rectangularly arrayed patches/colonies on agar plates photographed against a dark background.
 
 ## Organization
 
