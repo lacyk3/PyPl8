@@ -55,7 +55,8 @@ None. Files will be renamed inplace.
 ### ProcessImage()
 ```
 df, tiles, masks, corners = PyPl8.ProcessImage(file, sourcefolder, outputfolder,
-                                               crop_method = 'Auto', crop_param = None, adjust = True, rotate = False, 
+                                               crop_method = 'Auto', crop_param = None, 
+                                               adjust = True, rotate = False, 
                                                s = 200, array_dimensions = (8,12), 
                                                pin_size = 25, features = 'size', save = True, 
                                                display = False, calibrate = False)
@@ -87,8 +88,11 @@ df, tiles, masks, corners = PyPl8.ProcessImage(file, sourcefolder, outputfolder,
 ### ProcessBatch()
 ```
 PyPl8.ProcessBatch(sourcefolder, outputfolder,   
-             crop_method = 'Auto', adjust = True, rotate = False, crop_param = None, calibrate = True,
-             s = 200, array_dimensions = (8,12), pin_size = 25, features = 'size', save = True, display = False)
+                   crop_method = 'Auto', adjust = True, 
+                   rotate = False, crop_param = None, 
+                   s = 200, array_dimensions = (8,12), 
+                   pin_size = 25, features = 'size', 
+                   save = True, display = False, calibrate = True,)
 ```
 > You can use the function `ProcessBatch()` to process images in serial or the function `ParallelProcessBatch()` to process images in parallel. By default in both cases, you will calibrate the pre-processing step using the first image in the folder, so be sure that the first image is a good representative of the batch. For example, don't use an image that is crooked or has significant contamination. The auto-adjust option in preprocessing is sensitive to the initial guess, so using an outlier case as the initial guess for other images will not work well. If you are running these functions in the terminal, then you will want to set calibrate = False as you cannot display the images for interaction. Once calibrated, these functions loop through all the images in the input folder and save a segmented version as well as a .csv file in the output folder. The names of these output files are derived from the name of the input images. Batch processing also produces two log files: 
 > - BatchParameters.txt lists the parameters used to process the batch
@@ -117,8 +121,11 @@ None. There is no output from the batch processing functions to the workspace ot
 ### ParallelProcessBatch()
 ```
 PyPl8.ParallelProcessBatch(sourcefolder, outputfolder, numThreads = 2,   
-                crop_method = 'Auto', adjust = True, rotate = False, crop_param = None, calibrate = True,
-                s = 200, array_dimensions = (8,12), pin_size = 25, features = 'size', save = True, display = False)
+                           crop_method = 'Auto', adjust = True, rotate = False, 
+                           crop_param = None, calibrate = True,
+                           s = 200, array_dimensions = (8,12), 
+                           pin_size = 25, features = 'size', 
+                           save = True, display = False)
 ```
 > This is the parallel version of ProcessBatch() described above. It functions the same except that you cannot set `display = True` and you can specify the number of threads over which to split the workload. 
 
