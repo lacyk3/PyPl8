@@ -84,7 +84,7 @@ df, tiles, masks, corners = PyPl8.ProcessImage(file, sourcefolder, outputfolder,
 - **corners:** *list of tuples* This is a list of the location of the top left corner of each tile within the original image. It is used when reconstructing the segmented images. 
 
 ```
-ProcessBatch(sourcefolder, outputfolder,   
+PyPl8.ProcessBatch(sourcefolder, outputfolder,   
              crop_method = 'Auto', adjust = True, rotate = False, crop_param = None, calibrate = True,
              s = 200, array_dimensions = (8,12), pin_size = 25, features = 'size', save = True, display = False)
 ```
@@ -110,5 +110,17 @@ ProcessBatch(sourcefolder, outputfolder,
 - **display:** *boolean (optional)* The default value is `False`. If `True`, segmented plate images will be displayed to the screen as they are constructed. This can slow down processing significantly, but when processed a small batch may be useful. It is only available for serial processing though, not parallel processing.
 
 #### Returns
-None. There is no output from the batch processing functions to the workspace other than printing the names of the images to the screen as they are processed. When save = True, this function will save a .csv and a segmented .jpg file for each image in the output folder. When display = True, the segmented images are displayed to the screen as they are created. 
+None. There is no output from the batch processing functions to the workspace other than printing the names of the images to the screen as they are processed. When `save = True`, this function will save a .csv and a segmented .jpg file for each image in the output folder. When `display = True`, the segmented images are displayed to the screen as they are created. 
 
+```
+PyPl8.ParallelProcessBatch(sourcefolder, outputfolder, numThreads = 2,   
+                crop_method = 'Auto', adjust = True, rotate = False, crop_param = None, calibrate = True,
+                s = 200, array_dimensions = (8,12), pin_size = 25, features = 'size', save = True, display = False)
+```
+> This is the parallel version of ProcessBatch() described above. It functions the same except that you cannot set `display = True` and you can specify the number of threads over which to split the workload. 
+
+#### Parameters
+See BatchProcess() paramters. Addtionally you can specify
+- **numThreads:** *integer (optional)* The default value is 2. Sets the number of threads to use when processing images in parallel. More is not always better. When testing a batch of 350 images, I found that using numThreads = 3-7 performed well and numThreads = 6 was the fastest. Beyond that processing time increased.
+#### Returns 
+See BatchProcess().
