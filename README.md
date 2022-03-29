@@ -22,7 +22,7 @@ To check which version of PyPl8 you have installed run
     PyPl8.__version__
 ```
 
-Installing PyPl8 via pip should check for and install any missing dependencies. However, you can also reference the environment.yml file provided above to see the environment used during package development. 
+Installing PyPl8 via pip should check for and install any missing dependencies. However, if you are having issues with a certain version of a dependent package, you can also reference the environment.yml file provided above to see the exact environment used during package development. 
 
 ## Organization
 
