@@ -27,6 +27,6 @@ The function `ProcessImageTest()`, processes images already loaded into the work
 ```
 ## Examples
 
-Please visit the PyPl8 github page to see examples and more detailed documentation.
+Check out the Examples folder for jupyter notebooks using the functions `PyPl8.Barcodes.BarcodeMethods.Rename()`, `PyPl8.ProcessImage()`, `PyPl8.ProcessBatch()`, `PyPl8.ParallelProcessBatch()`, and `PyPl8.TestProcessImage()`.
 
 
