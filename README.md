@@ -31,7 +31,7 @@ Check out the Examples folder for jupyter notebooks using the functions `PyPl8.B
 
 
 ## Functions
-
+### Rename()
 `PyPl8.Barcodes.BarcodeMethods.Rename(image_folder, master_sheet, column_list, code='', delimiter='_', datetime_delimiter='-', datetime=True)`
 
 > You can use the `Rename()` function from `PyPl8.Barcodes.BarcodeMethods` to rename a folder of images. The function will first make a list of the .jpg files in the input folder. Then it will load the provided excel or csv file and convert it to a data frame. The data frame will be used to map from the barcode numbers to the relevent information to be used in the new name. For the function to work correctly, the barcodes must be in the first column of the excel or csv file and have the column title "Barcode". The other column names can be whatever you choose, but should not contain spaces. Once the reference data frame has been built, the function will loop through each image on the file list and 
@@ -52,6 +52,7 @@ Check out the Examples folder for jupyter notebooks using the functions `PyPl8.B
 #### Returns
 None. Files will be renamed inplace.
 
+### ProcessImage()
 ```
 df, tiles, masks, corners = PyPl8.ProcessImage(file, sourcefolder, outputfolder,
                                                crop_method = 'Auto', crop_param = None, adjust = True, rotate = False, 
@@ -83,6 +84,7 @@ df, tiles, masks, corners = PyPl8.ProcessImage(file, sourcefolder, outputfolder,
 - **masks:** *list of binary images* To segment the tiles and look at the segmentation that corresponds to each data point, multiply the masks and tiles together. 
 - **corners:** *list of tuples* This is a list of the location of the top left corner of each tile within the original image. It is used when reconstructing the segmented images. 
 
+### ProcessBatch()
 ```
 PyPl8.ProcessBatch(sourcefolder, outputfolder,   
              crop_method = 'Auto', adjust = True, rotate = False, crop_param = None, calibrate = True,
@@ -112,6 +114,7 @@ PyPl8.ProcessBatch(sourcefolder, outputfolder,
 #### Returns
 None. There is no output from the batch processing functions to the workspace other than printing the names of the images to the screen as they are processed. When `save = True`, this function will save a .csv and a segmented .jpg file for each image in the output folder. When `display = True`, the segmented images are displayed to the screen as they are created. 
 
+### ParallelProcessBatch()
 ```
 PyPl8.ParallelProcessBatch(sourcefolder, outputfolder, numThreads = 2,   
                 crop_method = 'Auto', adjust = True, rotate = False, crop_param = None, calibrate = True,
