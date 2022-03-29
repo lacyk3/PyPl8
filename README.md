@@ -3,30 +3,30 @@
 Image analysis package for segmenting images of microbial communities and extracting quantitative features automatically. 
 
 ## Background
-This package makes use of the cv2 and sci-kit image libraries. 
+This package makes use of the cv2 and sci-kit image libraries for image processing. 
 
-It was developed in the Dudley lab at Pacific Northwest Research Institute and currently is most useful for analyzing images of rectangularly arrayed
-patches/colonies on omnitrays photographed against a dark background.
+It was developed in the Dudley lab at Pacific Northwest Research Institute and is currently most useful for analyzing images of rectangularly arrayed
+patches/colonies on agar plates photographed against a dark background.
 
 ## Organization
 
-* The function in the barcode methods can be used to rename images based on a barcode visible in the image if an excel spreadsheet 
-relating barcode numbers to relevant plate information is provided.
+* **PyPl8.BarcodeMethods** contains the function `Rename()`. This function renames a folder of images by matching the barcode visible in each image to information provided in an excel spreadsheet. Barcodes are detected using pyzbar. 
+See their [documentation](https://pypi.org/project/pyzbar/) for a list of recognizable barcode styles. 
 
-* The functions in the preprocessing methods are used to crop each image to relevant areas of interest
+* **PyPl8.PreprocessingMethods** contains functions used to crop each image to relevant areas of interest prior to segmentation. 
 
-* The file process_images.py contains the main functions for processing a single image or a batch of images
+* **ProcessImages.py** contains the function `ProcessImage()` for processing a single image and the functions `ProcessBatch()` and `ParallelProcessBatch()` for processing a folder of images with the same settings.
 
-## Dependencies
+* The package contains 3 example images,`Funnel()`, `PSAT1()`, and `OTC()`, which can be used to test out the package.
+The function `ProcessImageTest()`, processes images already loaded into the workspace as arrays as the example images would be.
 
-This package was developed with the following versions of dependencies:
-* python 3.10.1
-* Ipython 7.29.0
-* matplotlib 3.5.0
-* numpy 1.19.2
-* opencv-python 4.2.0.32
-* pandas 1.3.4
-* pyzbar 0.1.8
-* scikit-image 0.18.3
-* scipy 1.6.2
+* To check which version of PyPl8 you have installed run
+```
+    import PyPl8
+    PyPl8.__version__
+```
+## Examples
+
+Please visit the PyPl8 github page to see examples and more detailed documentation.
+
 
