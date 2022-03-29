@@ -129,18 +129,18 @@ def AutoAdjust(image, corners, s = 200, array_dimensions = (8,12)):
     tiles = MakeTiles(img,corners)
     n = round(s/2)
     
-    rowshifts = []
-    columnshifts = np.zeros(12)
+    columnshifts = np.zeros(array_dimensions[1])
+    rowpositions =  np.zeros(array_dimensions[0])
     tilestoadjust=[]
-    new_corners = []
-    rowpositions = []
+    new_corners = [None]*len(tiles)
+    
     j = 0
     for r in range(0,array_dimensions[0]): # loop over rows
         row_position=[]
         for c in range(0,array_dimensions[1]): # loop over columns
             t = tiles[j]
             r1,c1 = corners[j]
-            m = remove_small_objects(t>.6, min_size =2000)
+            m = remove_small_objects(t>.6, min_size = 0.05*s**2)
             labels = label(m)
             if np.max(labels):
                 props = regionprops(labels)
@@ -173,33 +173,36 @@ def AutoAdjust(image, corners, s = 200, array_dimensions = (8,12)):
                 shift_x = 0
                 shift_y = 0
                 tilestoadjust.append(j)
-            new_corners.append((r1 + int(shift_x),r1 + int(shift_x)+s,c1+int(shift_y),c1+int(shift_y)+s))        
+            new_corners[j] = (r1 + int(shift_x),c1+int(shift_y))        
             j = j + 1
         
         if row_position:
-            rowpositions.append(int(np.mean(row_position)))
+            rowpositions[r] = int(np.mean(row_position))
         else:
-            rowpositions.append(float('nan'))
+            rowpositions[r] = float('nan')
 
     colshifts = [int(c/array_dimensions[0]) for c in columnshifts]
-    if np.isnan(rowpositions).any():
-        indices = np.argwhere(np.isnan(rowpositions))[0]
-        for idx in indices:
-            if idx == 0:
-                rowpositions[0] = rowpositions[1] - s
-            elif idx == len(rowpositions)-1:
-                rowpositions[len(rowpositions)-1] = rowpositions[len(rowpositions)-2] + s
-            else:
-                rowpositions[idx] = int((rowpositions[idx-1]+rowpositions[idx+1])/2)
+    try:
+        if np.isnan(rowpositions).any():
+            indices = np.argwhere(np.isnan(rowpositions))[0]
+            for idx in indices:
+                if idx == 0:
+                    rowpositions[0] = rowpositions[1] - s
+                elif idx == len(rowpositions)-1:
+                    rowpositions[len(rowpositions)-1] = rowpositions[len(rowpositions)-2] + s
+                else:
+                    rowpositions[idx] = int((rowpositions[idx-1]+rowpositions[idx+1])/2)
+    except:
+        print('Autoadjust failed in preprocessing because colony growth is too faint. Try grid crop without auto adjust.')
     # adjust placement of tiles that appeared empty as well based on average adjustment across strong growers
     
     j = 0
     for c in new_corners:
-        r1, r2, c1, c2 = c
+        r1, c1 = c
         if j in tilestoadjust:
             r1 = rowpositions[int(np.floor(j/array_dimensions[1]))]
             c1 = c1+colshifts[j%array_dimensions[1]]            
-        new_corners[j] = (r1,c1)
+        new_corners[j] = (int(r1),int(c1))
         j = j+1    
     return new_corners
         
@@ -219,11 +222,11 @@ def MakeTiles(image, corners, s = 200):
         img = image
     else:
         print("Input image must be grayscale or RGB.")
-    tiles = []
-    for c in corners:
+    tiles = [None]*len(corners)
+    for i, c in enumerate(corners):
         r1,c1 = c    
         temp = img[r1:r1+s,c1:c1+s]
-        tiles.append(temp.copy())
+        tiles[i] = temp.copy()
     return tiles
 
 # Cropping Options
@@ -262,7 +265,7 @@ def AutoCrop(file, sourcefolderpath, rotate = False,
 
     # -- Identify top and bottom
     bw = img>.5
-    bw = remove_small_objects(bw, min_size =1000)
+    bw = remove_small_objects(bw, min_size =0.025*s**2)
     mask = convex_hull_image(bw)
 
     y = np.sum(mask, axis = 1)
@@ -275,10 +278,12 @@ def AutoCrop(file, sourcefolderpath, rotate = False,
     bufferc = 175
     rps = np.linspace(r1+bufferr, r2-bufferr, array_dimensions[0])
     cps = np.linspace(c1+bufferc, c2-bufferr, array_dimensions[1])
-    corners = []
+    corners = [None]*len(rps)*len(cps)
+    j = 0
     for r in rps:
         for c in cps:
-            corners.append((int(r-s/2),int(c-s/2))) 
+            corners[j] = (int(r-s/2),int(c-s/2))
+            j = j+ 1
     # -- Adjust to center each patch on a tile
     if adjust:
         new_corners = AutoAdjust(img, corners, s = s, array_dimensions = array_dimensions)
@@ -321,10 +326,12 @@ def GridCrop(file, sourcefolderpath, rotate = False,
     rps = np.linspace(r1,r2,8)
     cps = np.linspace(c1,c2,12)
     
-    corners = []
+    corners = [None]*len(rps)*len(cps)
+    j = 0
     for r in rps:
         for c in cps:
-            corners.append((int(r-s/2),int(c-s/2))) 
+            corners[j] = (int(r-s/2),int(c-s/2))
+            j = j+ 1
     
     # -- Adjust to center each patch on a tile
     if adjust:
@@ -383,12 +390,14 @@ def ClickCrop(file, sourcefolder, s=200, array_dimensions = (8,12), rotate = Fal
             rps = np.linspace(r1,r2,8)
             cps = np.linspace(c1,c2,12)
             
-            corners = []
-            cv2.rectangle(image, (int(c1-n),int(r1-n)), (int(c1+n),int(r1+n)), (0, 255, 0), 2)         
+            corners = [None]*len(rps)*len(cps)
+            cv2.rectangle(image, (int(c1-n),int(r1-n)), (int(c1+n),int(r1+n)), (0, 255, 0), 2)   
+            j = 0
             for r in rps:
                 for c in cps:
-                    corners.append((int((r-n)*4),int((c-n)*4)))
+                    corners[j] = (int((r-n)*4),int((c-n)*4))
                     cv2.rectangle(image, (int(c-n),int(r-n)), (int(c+n),int(r+n)), (255, 0, 0), 2) 
+                    j = j+1
             output = corners.copy()
             cv2.imshow("image", image)
                
@@ -440,7 +449,6 @@ def EnhancedGridDisplay(image, corner, s, array_dimensions):
     rps = np.linspace(r1,r2,8)
     cps = np.linspace(c1,c2,12)
     
-    corners = []
     for r in rps:
         for c in cps:
             r1 = int(r-s/2)
@@ -452,6 +460,7 @@ def EnhancedGridDisplay(image, corner, s, array_dimensions):
 
 def AutoCropTest(image, s = 200, array_dimensions = (8,12),adjust=True, display = False):
     '''
+    Cropping adjusted for test images included in package (ie image is already loaded as an array)
     Input: RGB or grayscale image of rectangular arrayed plate.
            parameter: plate height in pixels
            s side length of desired tiles in pixels
@@ -495,10 +504,12 @@ def AutoCropTest(image, s = 200, array_dimensions = (8,12),adjust=True, display 
     bufferc = 175
     rps = np.linspace(r1+bufferr, r2-bufferr, array_dimensions[0])
     cps = np.linspace(c1+bufferc, c2-bufferc, array_dimensions[1])
-    corners = []
+    corners = [None]*len(rps)*len(cps)
+    j = 0
     for r in rps:
         for c in cps:
-            corners.append((int(r-s/2),int(c-s/2))) 
+            corners[j] = (int(r-s/2),int(c-s/2))
+            j = j+ 1
     # -- Adjust to center each patch on a tile
     if adjust:
         new_corners = AutoAdjust(img, corners, s = s, array_dimensions = array_dimensions)
@@ -511,6 +522,7 @@ def AutoCropTest(image, s = 200, array_dimensions = (8,12),adjust=True, display 
 def GridCropTest(image, A1_location = (500,500), s = 200, array_dimensions = (8,12), 
               adjust=True, display = False):
     '''
+    Cropping adjusted for test images included in package (ie image is already loaded as an array)
     input: image array
            expected dimensions of array of colonies on plate
            A1_location: estimate of center of pin location A1
@@ -536,13 +548,15 @@ def GridCropTest(image, A1_location = (500,500), s = 200, array_dimensions = (8,
     c1 = A1_location[1]
     c2 = c1 + (array_dimensions[1]- 1/2)*s*1.02
 
-    rps = np.linspace(r1,r2,8)
-    cps = np.linspace(c1,c2,12)
+    rps = np.linspace(r1,r2,array_dimensions[0])
+    cps = np.linspace(c1,c2,array_dimensions[1])
     
-    corners = []
+    corners = [None]*len(rps)*len(cps)
+    j = 0
     for r in rps:
         for c in cps:
-            corners.append((int(r-s/2),int(c-s/2))) 
+            corners[j] = (int(r-s/2),int(c-s/2))
+            j = j+ 1
     
     # -- Adjust to center each patch on a tile
     if adjust:
